@@ -6,7 +6,7 @@ util = require './dist/util.js'
 
 w = 800
 h = 600
-n = 500
+n = 100
 
 
 IntPtr = ref.refType("int")
