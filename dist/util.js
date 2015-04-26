@@ -21,3 +21,13 @@ exports.drawTriangle = function(ctx, triangle) {
   ctx.stroke();
   return ctx.restore();
 };
+
+exports.drawCircle = function(ctx, circle) {
+  ctx.save();
+  ctx.strokeStyle = typeof strokeColor !== 'undefined' ? strokeColor : 'rgba(0, 0, 0, 1.0)';
+  ctx.beginPath();
+  ctx.arc(circle.center.x, circle.center.y, circle.radius, 0, Math.PI * 2, false);
+  ctx.closePath();
+  ctx.stroke();
+  return ctx.restore();
+};

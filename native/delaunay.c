@@ -50,7 +50,9 @@ int calculate(int width,
 			  int n,
 			  Point points[],
 			  int* tn,
-			  NodeTriangle final_triangles[]) {
+			  NodeTriangle final_triangles[],
+			  int* cn,
+			  Circle circles[]) {
 	int i, j, hit_count = 0;
 	Point p[3], a, b, c, p1[3], p2[3], p3[3], p_A, p_B, p_C, p_D;
 	Triangle *t_abc, *t_abd;
@@ -69,6 +71,9 @@ int calculate(int width,
 	triangles.n = 0;
 	triangles.length = 0;
 	triangles.elem = (Triangle*)malloc(sizeof(Triangle)*100*n);
+
+	(*tn) = 0;
+	(*cn) = 0;
 
 	// super triangle
 	double cx = width / 2.0;
@@ -136,18 +141,27 @@ int calculate(int width,
 			p_B = edge->end;
 			p_C = t_abc->points[getCommonPointEdge(t_abc, edge)];
 			p_D = t_abd->points[getCommonPointEdge(t_abd, edge)];
+			/*printf("A(%f, %f), B(%f, %f), C(%f, %f), D(%f, %f)\n",*/
+					/*p_A.x, p_A.y,*/
+					/*p_B.x, p_B.y,*/
+					/*p_C.x, p_C.y,*/
+					/*p_D.x, p_D.y*/
+			/*);*/
 
 			getCircumscribedCircle(t_abc, &temp_cir);
+
+			if (hasPointByTriangle(t_abc, &p[0]) == 0 &&
+				hasPointByTriangle(t_abc, &p[1]) == 0 &&
+				hasPointByTriangle(t_abc, &p[2]) == 0) {
+				circles[(*cn)].center = temp_cir.center;
+				circles[(*cn)].radius = temp_cir.radius;
+				(*cn)++;
+			}
+
 			if (hitCircle(&temp_cir, &p_D) != 0) {
 				// Debug print
 				printf("flip: id[%d], id[%d]\n", t_abc->id, t_abd->id);
 				printf("edge: start(%f, %f), end(%f, %f)\n", edge->start.x, edge->start.y, edge->end.x, edge->end.y);
-				printf("A(%f, %f), B(%f, %f), C(%f, %f), D(%f, %f)\n",
-						p_A.x, p_A.y,
-						p_B.x, p_B.y,
-						p_C.x, p_C.y,
-						p_D.x, p_D.y
-				);
 
 				remove_triangle(&triangles, t_abc->id);
 				remove_triangle(&triangles, t_abd->id);
@@ -168,7 +182,6 @@ int calculate(int width,
 		}
 	}
 
-	(*tn) = 0;
 	for (i = 0; i < triangles.length; ++i) {
 		if (hasPointByTriangle(&triangles.elem[i], &p[0]) != 0 ||
 			hasPointByTriangle(&triangles.elem[i], &p[1]) != 0 ||

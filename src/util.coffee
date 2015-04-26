@@ -19,3 +19,12 @@ exports.drawTriangle = (ctx, triangle) ->
     ctx.fill()
     ctx.stroke()
     ctx.restore()
+
+exports.drawCircle = (ctx, circle) ->
+    ctx.save()
+    ctx.strokeStyle = if typeof(strokeColor) isnt 'undefined' then strokeColor else 'rgba(0, 0, 0, 1.0)'
+    ctx.beginPath()
+    ctx.arc(circle.center.x, circle.center.y, circle.radius, 0, Math.PI * 2, false)
+    ctx.closePath()
+    ctx.stroke()
+    ctx.restore()

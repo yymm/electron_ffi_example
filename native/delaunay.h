@@ -19,4 +19,6 @@ int calculate(int width,
 			  int n,
 			  Point points[],
 			  int* tn,
-			  NodeTriangle final_triangles[]);
+			  NodeTriangle final_triangles[],
+			  int* cn,
+			  Circle circles[]);
