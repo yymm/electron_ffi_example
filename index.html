@@ -1,21 +1,305 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Delaunay</title>
-	<style>
-html, body {
-	margin: 0;
-	padding: 0;
-}
-canvas {
-	vertical-align: middle;
-}
-	</style>
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3, h4, h5 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      h3:before,
+      h4:before,
+      h5:before {
+      	    content: "✘ ";
+      }
+      .title h3:before,
+      .title h4:before,
+      .title h5:before {
+      	    content: "";
+      }
+	  .icon img {
+		  position: absolute;
+		  right: 250px;
+		  top: 250px;
+		  width: 120px;
+		  height: 120px;
+	  }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
   </head>
   <body>
-    <!--We are using node.js <script>document.write(process.version)</script>-->
-    <!--and Electron <script>document.write(process.versions['electron'])</script>.-->
-	<canvas id="cv"></canvas>
-    <script src="dist/app.js"></script>
+    <textarea id="source">
+
+name: title
+class: middle title
+
+### ElectronとC/C++ネイティブモジュール(node-ffi)
+
+<br />
+<br />
+<br />
+
+Electron(旧:Atom-Shell)勉強会 #1
+
+Yuya Yano (@yymm)
+
+2015/04/24
+
+---
+
+class: middle, icon
+
+### 自己紹介
+
+Yuya Yano ([@yymm](https://github.com/yymm "yymm (yymm)") | twitter: [@yymm6666](https://twitter.com/yymm6666 "(く◡も) .｡oO (SIGSEGV)(@yymm6666)さん | Twitter")) ☞
+
+* 仕事: C, C++, C#, Fortran
+* 趣味: Python, Nodejs, Golang, Rust, Vim
+* LTというか外部勉強会での発表はじめて
+
+※Web系は本業ではないので...
+
+![](https://pbs.twimg.com/profile_images/446540957521936384/2xOuJ9s-.png)
+
+---
+
+class: middle
+
+### 何でElectronか?
+
+#### 私の仕事
+
+C/C++でシミュレーション計算
+
+C/C++を書く毎日
+
+メモリ管理、最適化に消耗する毎日
+
+今はライブラリ作成ですが、GUIはきっとQtかgtk...
+
+<!--Memo: はじめに私がElectronを始めた背景です-->
+
+---
+
+class: center, middle, title
+
+### ずっとC/C++書いてる人生が辛くなってきた
+
+---
+
+class: middle
+
+### ElectronでC/C++のモジュールを使えば楽しい人生
+
+調べたところ以下の選択肢があるようです。
+
+* node-gyp
+* swig+node-gyp
+* node-ffi
+* emscripten
+
+<!--メモ: ひと通り説明-->
+
+---
+
+class: middle
+
+### ElectronでC/C++のモジュールを使う
+
+いろいろありますが、node-ffiを紹介します。
+
+* ~~node-gyp~~
+* ~~swig+node-gyp~~
+* node-ffi
+* ~~emscripten~~
+
+<!--メモ:-->
+
+<!--* swigはelectronになったAtom-Shellでは動かなかった-->
+<!--* node-gypでC/C++書くのは時間的に無理だったv8...-->
+<!--* emscriptenやる意味なぞですね-->
+
+---
+
+class: middle
+
+### node-ffi
+
+node-gypの人([TooTallNate氏](https://github.com/TooTallNate))がメインコミッタで作っている、動的ライブラリをJavascriptから呼ぶためのツール(libffiを使っている)
+
+[node-ffi/node-ffi](https://github.com/node-ffi/node-ffi "node-ffi/node-ffi")
+
+> node-ffi is a Node.js addon for loading and calling dynamic libraries using pure JavaScript.
+> It can be used to create bindings to native libraries without writing any C++ code.
+
+C言語で書かれたライブラリは動く
+
+C++は書かなくっていいって書いてある
+
+**C++は書かなくっていいって書いてある**
+
+<!--メモ: そのまま説明-->
+<!--残念ながらC++の話はないです-->
+
+---
+
+class: center, middle
+
+### ElectronとC~~/C++~~ネイティブモジュール(node-ffi)
+
+---
+
+class: middle
+
+### node-ffiについて
+
+```coffeescript
+ffi = require 'ffi'
+
+libm = ffi.Library 'libm',
+  'ceil': [ 'double', [ 'double' ] ]
+
+libm.ceil(1.5) # 2
+
+mylib = ffi.Library './libmylibrary.so',
+  'sayElectron': [ 'string', [ ] ]
+
+mylib.sayElectron() # "Electron"
+```
+
+* シンプルなインターフェース
+* gccでコンパイルしたライブラリも簡単に呼べる(option: -shared -fpic)
+* SQLiteとかOpenCVとかも使える
+
+<!------->
+
+<!--class: center, middle-->
+
+<!--## Demo-->
+
+---
+
+class: middle
+
+### node-ffiについて(ポインタ)
+
+```bash
+$ npm install --save ref
+```
+
+```coffeescript
+ffi = require 'ffi'
+ref = require 'ref'
+
+IntPtr = ref.refType("int")
+
+mylib = ffi.Library './libmylibrary.so',
+  'pointerTest': [ 'int', [ IntPtr ] ]
+
+n = ref.alloc('int')
+mylib.pointerTest(n)
+actual_n = tn.deref()
+console.log actual_n
+```
+
+---
+
+class: middle
+
+### node-ffiについて(構造体)
+
+```bash
+$ npm install --save ref-struct
+```
+
+```coffeescript
+ffi = require 'ffi'
+Struct = require 'ref-struct'
+
+Point = Struct
+    'x': 'double'
+    'y': 'double'
+
+PointPtr = ref.refType(Point)
+
+mylib = ffi.Library './libmylibrary.so',
+  'move': [ 'int', [ PointPtr, 'double', 'double' ] ]
+
+p = new Point()
+p.x = 0.1
+p.y = 0.2
+
+mylib.move(p.ref(), 0.5, 0.5)
+
+console.log p.x # 0.6
+console.log p.y # 0.7
+```
+
+---
+
+class: middle
+
+### node-ffiについて(配列)
+
+```bash
+$ npm install --save ref-array
+```
+
+```coffeescript
+ffi = require 'ffi'
+Struct = require 'ref-struct'
+ArrayType = require 'ref-array'
+
+Point = Struct
+    'x': 'double'
+    'y': 'double'
+
+PointArray = ArrayType(Point)
+
+mylib = ffi.Library './libmylibrary.so',
+  'movePoints': [ 'int', [ 'int', PointArray, 'double', 'double'] ]
+
+points = new PointArray(5)
+
+for i in [0..points.length-1]
+  points[i].x = i
+  points[i].y = i
+
+mylib.movePoints(points.length, points, 0.5, 0.5)
+```
+
+---
+
+class: middle
+
+### 今後の課題と苦行
+
+* Cは大丈夫そうですが、C++...
+* SWIG+node-gypでいけそうでしたが...
+  * ビルドエラー
+  * 謎のランタイムエラー
+  * nodev0.10.xでは動くが、対応するElectron, nw.jsに巡り合えなかった
+  * v8?
+* demo is dead
+
+---
+
+class: center, middle
+
+## ご清聴ありがとうございました
+
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
   </body>
 </html>
